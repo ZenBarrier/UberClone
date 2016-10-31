@@ -5,4 +5,5 @@
     <string name="text_driver">Driver</string>
     <string name="text_rider">Rider</string>
     <string name="content_description_logo">Logo</string>
+    <string name="title_activity_rider_maps">Map</string>
 </resources>
