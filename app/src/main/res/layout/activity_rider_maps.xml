@@ -19,7 +19,8 @@
         android:id="@+id/buttonRiderRequest"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="15dp" />
+        android:layout_margin="15dp"
+        android:onClick="requestUber" />
 
     <TextView
         tools:text="Finding Uber Driver..."
@@ -30,5 +31,7 @@
         android:layout_alignBaseline="@+id/buttonRiderRequest"
         android:layout_alignBottom="@+id/buttonRiderRequest"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="13dp" />
+        android:layout_marginStart="13dp"
+        android:textSize="18sp"
+        android:textStyle="normal|bold" />
 </RelativeLayout>

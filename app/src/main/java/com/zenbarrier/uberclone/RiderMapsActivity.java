@@ -8,6 +8,8 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,6 +18,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
@@ -23,6 +27,8 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     LocationManager locationManager;
     String provider;
     Marker riderLocation;
+    boolean isRequesting = false;
+    ParseObject request;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +73,22 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             return;
         }
         locationManager.removeUpdates(this);
+    }
+
+    public void requestUber(View view){
+        TextView feedback = (TextView) findViewById(R.id.textRiderFeedback);
+        isRequesting = !isRequesting;
+
+        if(isRequesting){
+            feedback.setText("Finding Uber Driver...");
+            request = new ParseObject("Requests");
+            request.put("riderId", ParseUser.getCurrentUser().getObjectId());
+            request.saveInBackground();
+        }
+        else {
+            feedback.setText("Uber Cancelled");
+            request.deleteInBackground();
+        }
     }
 
     /**
