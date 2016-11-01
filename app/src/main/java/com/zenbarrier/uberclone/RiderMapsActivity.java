@@ -80,13 +80,13 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         isRequesting = !isRequesting;
 
         if(isRequesting){
-            feedback.setText("Finding Uber Driver...");
+            feedback.setText(R.string.rider_activity_feedback_finding);
             request = new ParseObject("Requests");
             request.put("riderId", ParseUser.getCurrentUser().getObjectId());
             request.saveInBackground();
         }
         else {
-            feedback.setText("Uber Cancelled");
+            feedback.setText(R.string.rider_activity_feedback_canceled);
             request.deleteInBackground();
         }
     }

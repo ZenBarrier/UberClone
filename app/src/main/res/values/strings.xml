@@ -7,4 +7,6 @@
     <string name="content_description_logo">Logo</string>
     <string name="title_activity_rider_maps">Map</string>
     <string name="rider_request_uber">Request Uber</string>
+    <string name="rider_activity_feedback_finding">Finding Uber Driver...</string>
+    <string name="rider_activity_feedback_canceled">Uber Cancelled</string>
 </resources>
