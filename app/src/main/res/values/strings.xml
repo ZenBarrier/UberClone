@@ -6,4 +6,5 @@
     <string name="text_rider">Rider</string>
     <string name="content_description_logo">Logo</string>
     <string name="title_activity_rider_maps">Map</string>
+    <string name="rider_request_uber">Request Uber</string>
 </resources>

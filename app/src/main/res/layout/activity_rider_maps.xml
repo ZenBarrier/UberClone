@@ -1,8 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutRiderMain">
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/map"
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zenbarrier.uberclone.RiderMapsActivity" />
+
+    <Button
+        android:text="@string/rider_request_uber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonRiderRequest"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="15dp" />
+
+    <TextView
+        tools:text="Finding Uber Driver..."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/buttonRiderRequest"
+        android:id="@+id/textRiderFeedback"
+        android:layout_alignBaseline="@+id/buttonRiderRequest"
+        android:layout_alignBottom="@+id/buttonRiderRequest"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="13dp" />
+</RelativeLayout>
