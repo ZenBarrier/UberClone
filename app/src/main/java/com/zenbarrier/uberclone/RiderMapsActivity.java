@@ -84,6 +84,8 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 
         if(isRequesting){
             feedback.setText(R.string.rider_activity_feedback_finding);
+            feedback.animate().cancel();
+            feedback.setAlpha(1f);
             buttonRiderRequest.setText(R.string.rider_activity_button_cancel);
             request = new ParseObject("Requests");
             request.put("riderId", ParseUser.getCurrentUser().getObjectId());
@@ -95,6 +97,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         }
         else {
             feedback.setText(R.string.rider_activity_feedback_canceled);
+            feedback.animate().alpha(0f).setStartDelay(2000).setDuration(2000);
             buttonRiderRequest.setText(R.string.rider_activity_button_request);
             request.deleteInBackground();
         }
