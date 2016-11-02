@@ -18,6 +18,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.ParseACL;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
@@ -83,6 +84,10 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             feedback.setText(R.string.rider_activity_feedback_finding);
             request = new ParseObject("Requests");
             request.put("riderId", ParseUser.getCurrentUser().getObjectId());
+            ParseACL acl = new ParseACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            request.setACL(acl);
             request.saveInBackground();
         }
         else {
