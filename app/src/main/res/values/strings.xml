@@ -9,4 +9,6 @@
     <string name="rider_request_uber">Request Uber</string>
     <string name="rider_activity_feedback_finding">Finding Uber Driver...</string>
     <string name="rider_activity_feedback_canceled">Uber Cancelled</string>
+    <string name="rider_activity_button_cancel">Cancel Uber</string>
+    <string name="rider_activity_button_request">Request Uber</string>
 </resources>

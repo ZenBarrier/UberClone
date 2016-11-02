@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -78,10 +79,12 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
 
     public void requestUber(View view){
         TextView feedback = (TextView) findViewById(R.id.textRiderFeedback);
+        Button buttonRiderRequest = (Button) findViewById(R.id.buttonRiderRequest);
         isRequesting = !isRequesting;
 
         if(isRequesting){
             feedback.setText(R.string.rider_activity_feedback_finding);
+            buttonRiderRequest.setText(R.string.rider_activity_button_cancel);
             request = new ParseObject("Requests");
             request.put("riderId", ParseUser.getCurrentUser().getObjectId());
             ParseACL acl = new ParseACL();
@@ -92,6 +95,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         }
         else {
             feedback.setText(R.string.rider_activity_feedback_canceled);
+            buttonRiderRequest.setText(R.string.rider_activity_button_request);
             request.deleteInBackground();
         }
     }
