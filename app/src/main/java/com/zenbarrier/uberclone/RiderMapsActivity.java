@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
 import com.parse.ParseACL;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -82,25 +83,27 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         locationManager.removeUpdates(this);
     }
 
-    public void requestUber(View view){
+    public void requestUber(View view) {
         TextView feedback = (TextView) findViewById(R.id.textRiderFeedback);
         Button buttonRiderRequest = (Button) findViewById(R.id.buttonRiderRequest);
         isRequesting = !isRequesting;
 
-        if(isRequesting){
+        if (isRequesting) {
             feedback.setText(R.string.rider_activity_feedback_finding);
             feedback.animate().cancel();
             feedback.setAlpha(1f);
             buttonRiderRequest.setText(R.string.rider_activity_button_cancel);
             request = new ParseObject("Requests");
             request.put("riderId", ParseUser.getCurrentUser().getObjectId());
+            Location location = getUserLocation();
+            ParseGeoPoint geoPoint = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+            request.put("riderLocation", geoPoint);
             ParseACL acl = new ParseACL();
             acl.setPublicReadAccess(true);
             acl.setPublicWriteAccess(true);
             request.setACL(acl);
             request.saveInBackground();
-        }
-        else {
+        } else {
             feedback.setText(R.string.rider_activity_feedback_canceled);
             feedback.animate().alpha(0f).setStartDelay(2000).setDuration(2000);
             buttonRiderRequest.setText(R.string.rider_activity_button_request);
@@ -109,19 +112,32 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             query.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
-                    if(e==null){
+                    if (e == null) {
                         try {
                             ParseObject.deleteAll(objects);
                         } catch (ParseException e1) {
                             e1.printStackTrace();
                         }
-                    }
-                    else{
+                    } else {
                         e.printStackTrace();
                     }
                 }
             });
         }
+    }
+
+    Location getUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        return locationManager.getLastKnownLocation(provider);
     }
 
     /**
@@ -136,18 +152,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        onLocationChanged(locationManager.getLastKnownLocation(provider));
+        onLocationChanged(getUserLocation());
     }
 
     @Override
