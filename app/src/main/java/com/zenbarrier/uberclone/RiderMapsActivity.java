@@ -19,9 +19,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.FindCallback;
 import com.parse.ParseACL;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import java.util.List;
 
 public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
@@ -99,7 +104,23 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             feedback.setText(R.string.rider_activity_feedback_canceled);
             feedback.animate().alpha(0f).setStartDelay(2000).setDuration(2000);
             buttonRiderRequest.setText(R.string.rider_activity_button_request);
-            request.deleteInBackground();
+            ParseQuery<ParseObject> query = new ParseQuery<>("Requests");
+            query.whereEqualTo("riderId", ParseUser.getCurrentUser().getObjectId());
+            query.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if(e==null){
+                        try {
+                            ParseObject.deleteAll(objects);
+                        } catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                    else{
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 
