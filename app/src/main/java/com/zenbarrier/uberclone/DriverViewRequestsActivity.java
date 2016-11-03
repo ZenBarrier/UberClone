@@ -9,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +26,8 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +59,25 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
         listViewRequests.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                ParseObject request = listRequests.get(i);
+                try {
+                    request.fetch();
+                    String riderId = request.getString("driverId");
+                    if(riderId == null || riderId.length() <= 0){
+                        Intent intent = new Intent(DriverViewRequestsActivity.this, DriverMapsActivity.class);
+                        intent.putExtra("requestId", request.getObjectId());
+                        startActivity(intent);
+                    }
+                    else{
+                        queryRequests(getCurrentLocation());
+                        Snackbar.make(findViewById(R.id.CoordinatorDriverRequests),
+                                "Not available anymore",
+                                Snackbar.LENGTH_SHORT).show();
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                request.put("driverId", ParseUser.getCurrentUser().getObjectId());
             }
         });
     }
@@ -110,6 +131,10 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
 
     @Override
     public void onLocationChanged(Location location) {
+        queryRequests(location);
+    }
+
+    void queryRequests(Location location){
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Requests");
         driverLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
         query.whereWithinMiles("riderLocation", driverLocation, 35.0);
@@ -117,7 +142,12 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 listRequests.clear();
-                listRequests.addAll(objects);
+                for(ParseObject object:objects){
+                    String driverId = object.getString("driverId");
+                    if(driverId==null || driverId.length()<=0);{
+                        listRequests.add(object);
+                    }
+                }
                 adapter.notifyDataSetChanged();
             }
         });
