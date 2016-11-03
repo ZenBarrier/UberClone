@@ -1,13 +1,40 @@
 package com.zenbarrier.uberclone;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
-public class DriverViewRequestsActivity extends AppCompatActivity {
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+public class DriverViewRequestsActivity extends AppCompatActivity implements LocationListener {
+    ListView listViewRequests;
+    String provider;
+    LocationManager locationManager;
+    ArrayList<ParseObject> listRequests;
+    requestAdapter adapter;
+    ParseGeoPoint driverLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,14 +43,113 @@ public class DriverViewRequestsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        listRequests = new ArrayList<>();
+        listViewRequests = (ListView) findViewById(R.id.listViewRequests);
+        adapter = new requestAdapter(this, listRequests);
+        listViewRequests.setAdapter(adapter);
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(new Criteria(), false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(provider, 400, 1, this);
+        onLocationChanged(getCurrentLocation());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.removeUpdates(this);
+    }
+
+    Location getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        return locationManager.getLastKnownLocation(provider);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Requests");
+        driverLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+        query.whereWithinMiles("riderLocation", driverLocation, 35.0);
+        query.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void done(List<ParseObject> objects, ParseException e) {
+                listRequests.clear();
+                listRequests.addAll(objects);
+                adapter.notifyDataSetChanged();
             }
         });
     }
 
+    class requestAdapter extends ArrayAdapter<ParseObject>{
+
+        requestAdapter(Context context, List<ParseObject> objects) {
+            super(context, 0, objects);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            ParseObject request = getItem(position);
+            if(convertView == null){
+                convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
+            }
+            TextView distanceText = (TextView) convertView.findViewById(android.R.id.text1);
+            TextView idText = (TextView) convertView.findViewById(android.R.id.text2);
+            if (request != null) {
+                double distanceMiles = request.getParseGeoPoint("riderLocation").distanceInMilesTo(driverLocation);
+                distanceText.setText(String.format(Locale.getDefault(),"%.2f miles", distanceMiles));
+                idText.setText(request.getObjectId());
+            }
+            return convertView;
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
 }
