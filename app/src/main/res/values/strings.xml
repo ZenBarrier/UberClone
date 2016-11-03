@@ -11,4 +11,5 @@
     <string name="rider_activity_feedback_canceled">Uber Cancelled</string>
     <string name="rider_activity_button_cancel">Cancel Uber</string>
     <string name="rider_activity_button_request">Request Uber</string>
+    <string name="title_activity_driver_view_requests">DriverViewRequestsActivity</string>
 </resources>

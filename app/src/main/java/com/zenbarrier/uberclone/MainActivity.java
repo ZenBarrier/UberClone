@@ -17,6 +17,7 @@ import com.parse.SaveCallback;
 public class MainActivity extends AppCompatActivity {
 
     Switch switchRole;
+    ParseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +28,14 @@ public class MainActivity extends AppCompatActivity {
 
         ParseAnalytics.trackAppOpenedInBackground(getIntent());
 
-        if(ParseUser.getCurrentUser() == null){
+        user = ParseUser.getCurrentUser();
+
+        if(user == null){
             ParseAnonymousUtils.logIn(new LogInCallback() {
                 @Override
-                public void done(ParseUser user, ParseException e) {
+                public void done(ParseUser userLogged, ParseException e) {
                     if(e==null){
+                        user = userLogged;
                         Log.i("Anon", "Successful");
                     }
                     else{
@@ -40,36 +44,40 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }else{
-            if(ParseUser.getCurrentUser().get("isDriver")!=null){
-                if(ParseUser.getCurrentUser().getBoolean("isDriver")){
-                    Log.i("isDriver", "Launch Driver Activity");
+            if(user.get("isDriver")!=null){
+                try {
+                    user.fetch();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                if(user.getBoolean("isDriver")){
+                    startUberActivity(DriverViewRequestsActivity.class);
                 }
                 else{
-                    startRiderActivity();
+                    startUberActivity(RiderMapsActivity.class);
                 }
             }
         }
     }
 
-    private void startRiderActivity() {
-        Intent intent = new Intent(this, RiderMapsActivity.class);
+    private void startUberActivity(Class<?> cls) {
+        Intent intent = new Intent(this, cls);
         startActivity(intent);
     }
 
     public void logIn(View view){
         final boolean isDriver = switchRole.isChecked();
-        ParseUser user = ParseUser.getCurrentUser();
         user.put("isDriver", isDriver);
+        Log.i("isDriver", isDriver+"");
         user.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if(e==null){
-                    Log.i("Sign", "Successful");
                     if(isDriver){
-                        //todo driveractivity
+                        startUberActivity(DriverViewRequestsActivity.class);
                     }
                     else{
-                        startRiderActivity();
+                        startUberActivity(RiderMapsActivity.class);
                     }
                 }
                 else{
