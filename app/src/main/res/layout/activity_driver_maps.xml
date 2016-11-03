@@ -1,4 +1,10 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutDriverMain">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/map"
@@ -6,3 +12,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zenbarrier.uberclone.DriverMapsActivity" />
+
+    <Button
+        android:text="Accept Request"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonAcceptRequest"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="acceptRequest" />
+
+</RelativeLayout>
