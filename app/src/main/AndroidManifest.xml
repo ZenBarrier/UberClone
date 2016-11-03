@@ -43,7 +43,14 @@
         <activity
             android:name=".DriverViewRequestsActivity"
             android:label="@string/title_activity_driver_view_requests"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".DriverMapsActivity"
+            android:label="@string/title_activity_driver_maps">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.zenbarrier.uberclone.DriverViewRequestsActivity" />
+        </activity>
     </application>
 
 </manifest>

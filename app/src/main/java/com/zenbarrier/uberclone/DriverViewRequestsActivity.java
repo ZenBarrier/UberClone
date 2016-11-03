@@ -1,6 +1,7 @@
 package com.zenbarrier.uberclone;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -14,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -50,6 +52,13 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
+
+        listViewRequests.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            }
+        });
     }
 
     @Override
