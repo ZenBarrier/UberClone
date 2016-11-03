@@ -13,4 +13,5 @@
     <string name="rider_activity_button_request">Request Uber</string>
     <string name="title_activity_driver_view_requests">DriverViewRequestsActivity</string>
     <string name="title_activity_driver_maps">Map</string>
+    <string name="button_accept_request">Accept Request</string>
 </resources>
