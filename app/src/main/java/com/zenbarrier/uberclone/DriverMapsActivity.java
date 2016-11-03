@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,12 +21,14 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.List;
 
 public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    ParseObject request;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +42,27 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     public void acceptRequest(View view){
-
+        try {
+            request.fetch();
+            String driverId = request.getString("driverId");
+            if(driverId == null || driverId.length()<=0){
+                request.put("driverId", ParseUser.getCurrentUser().getObjectId());
+                request.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if(e==null){
+                            //todo Launch maps directions
+                        }
+                    }
+                });
+            }
+            else{
+                Toast.makeText(this, "Not available anymore", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -64,7 +87,7 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if(e==null && objects.size() > 0){
-                    ParseObject request = objects.get(0);
+                    request = objects.get(0);
                     ParseGeoPoint requestGeo = request.getParseGeoPoint("riderLocation");
                     LatLng requestLatLng = new LatLng(requestGeo.getLatitude(), requestGeo.getLongitude());
                     Marker driverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title("Driver"));
