@@ -1,6 +1,7 @@
 package com.zenbarrier.uberclone;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.util.List;
+import java.util.Locale;
 
 public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -51,7 +53,27 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
                     @Override
                     public void done(ParseException e) {
                         if(e==null){
-                            //todo Launch maps directions
+                            try {
+                                request.fetch();
+                                //race condition. check if another driver accepted the request before user
+                                if(request.getString("driverId").equals(ParseUser.getCurrentUser().getObjectId())){
+                                    ParseGeoPoint geoPoint = request.getParseGeoPoint("riderLocation");
+                                    String uriString = String.format(Locale.ENGLISH,
+                                            "google.navigation:q=%s,%s&mode=d",
+                                            geoPoint.getLatitude(),
+                                            geoPoint.getLongitude());
+                                    Uri mapIntentUri = Uri.parse(uriString);
+                                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapIntentUri);
+                                    startActivity(mapIntent);
+                                }
+                                else{
+                                    Toast.makeText(getApplicationContext(), "Not available anymore", Toast.LENGTH_LONG).show();
+                                    finish();
+                                }
+                            } catch (ParseException e1) {
+                                e1.printStackTrace();
+                            }
+
                         }
                     }
                 });
