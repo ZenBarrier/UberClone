@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -66,6 +67,8 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
                     if(riderId == null || riderId.length() <= 0){
                         Intent intent = new Intent(DriverViewRequestsActivity.this, DriverMapsActivity.class);
                         intent.putExtra("requestId", request.getObjectId());
+                        intent.putExtra("driverLat", driverLocation.getLatitude());
+                        intent.putExtra("driverLng", driverLocation.getLongitude());
                         startActivity(intent);
                     }
                     else{

@@ -1,5 +1,6 @@
 package com.zenbarrier.uberclone;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,7 +11,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+
+import java.util.List;
 
 public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -28,7 +39,7 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     public void acceptRequest(View view){
-        
+
     }
 
 
@@ -44,10 +55,29 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Intent i = getIntent();
+        final LatLng driverLocation = new LatLng(i.getDoubleExtra("driverLat", 0), i.getDoubleExtra("driverLng", 0));
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Requests");
+        query.whereEqualTo("objectId", i.getStringExtra("requestId"));
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if(e==null && objects.size() > 0){
+                    ParseObject request = objects.get(0);
+                    ParseGeoPoint requestGeo = request.getParseGeoPoint("riderLocation");
+                    LatLng requestLatLng = new LatLng(requestGeo.getLatitude(), requestGeo.getLongitude());
+                    Marker driverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title("Driver"));
+                    Marker requestMarker = mMap.addMarker(new MarkerOptions().position(requestLatLng).title("Rider"));
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    builder.include(driverMarker.getPosition());
+                    builder.include(requestMarker.getPosition());
+                    LatLngBounds bound = builder.build();
+                    int padding = 50;
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bound, padding));
+                }
+            }
+        });
     }
 }
