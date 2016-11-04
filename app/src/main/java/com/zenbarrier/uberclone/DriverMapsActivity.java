@@ -12,6 +12,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -112,13 +113,14 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
                     request = objects.get(0);
                     ParseGeoPoint requestGeo = request.getParseGeoPoint("riderLocation");
                     LatLng requestLatLng = new LatLng(requestGeo.getLatitude(), requestGeo.getLongitude());
-                    Marker driverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title("Driver"));
+                    Marker driverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title("You")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
                     Marker requestMarker = mMap.addMarker(new MarkerOptions().position(requestLatLng).title("Rider"));
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
                     builder.include(driverMarker.getPosition());
                     builder.include(requestMarker.getPosition());
                     LatLngBounds bound = builder.build();
-                    int padding = 50;
+                    int padding = 100;
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bound, padding));
                 }
