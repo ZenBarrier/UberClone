@@ -8,13 +8,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +27,6 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,7 +131,7 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
                 listRequests.clear();
                 for(ParseObject object:objects){
                     String driverId = object.getString("driverId");
-                    if(driverId==null || driverId.length()<=0);{
+                    if(driverId==null || driverId.length()<=0){
                         listRequests.add(object);
                     }
                 }
