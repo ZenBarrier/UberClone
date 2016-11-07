@@ -14,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,22 +103,6 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
         onLocationChanged(getCurrentLocation());
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        locationManager.removeUpdates(this);
-    }
-
     Location getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -140,6 +125,8 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
     void queryRequests(Location location){
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Requests");
         driverLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+        ParseUser.getCurrentUser().put("location", driverLocation);
+        ParseUser.getCurrentUser().saveInBackground();
         query.whereWithinMiles("riderLocation", driverLocation, 35.0);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
