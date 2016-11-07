@@ -7,11 +7,12 @@
     <string name="content_description_logo">Logo</string>
     <string name="title_activity_rider_maps">Map</string>
     <string name="rider_request_uber">Request Uber</string>
-    <string name="rider_activity_feedback_finding">Finding Uber Driver...</string>
+    <string name="rider_activity_feedback_finding">Finding Uber Driver…</string>
     <string name="rider_activity_feedback_canceled">Uber Cancelled</string>
     <string name="rider_activity_button_cancel">Cancel Uber</string>
     <string name="rider_activity_button_request">Request Uber</string>
     <string name="title_activity_driver_view_requests">DriverViewRequestsActivity</string>
     <string name="title_activity_driver_maps">Map</string>
     <string name="button_accept_request">Accept Request</string>
+    <string name="rider_activity_feedback_on_the_way">Your driver is on their way.</string>
 </resources>

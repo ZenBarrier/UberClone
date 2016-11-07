@@ -57,7 +57,7 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
                                 request.fetch();
                                 //race condition. check if another driver accepted the request before user
                                 if(request.getString("driverId").equals(ParseUser.getCurrentUser().getObjectId())){
-                                    ParseGeoPoint geoPoint = request.getParseGeoPoint("riderLocation");
+                                    ParseGeoPoint geoPoint = request.getParseGeoPoint("riderMarker");
                                     String uriString = String.format(Locale.ENGLISH,
                                             "google.navigation:q=%s,%s&mode=d",
                                             geoPoint.getLatitude(),
@@ -110,7 +110,7 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
             public void done(List<ParseObject> objects, ParseException e) {
                 if(e==null && objects.size() > 0){
                     request = objects.get(0);
-                    ParseGeoPoint requestGeo = request.getParseGeoPoint("riderLocation");
+                    ParseGeoPoint requestGeo = request.getParseGeoPoint("riderMarker");
                     LatLng requestLatLng = new LatLng(requestGeo.getLatitude(), requestGeo.getLongitude());
                     Marker driverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title("You")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));

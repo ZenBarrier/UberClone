@@ -124,7 +124,7 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
         driverLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
         ParseUser.getCurrentUser().put("location", driverLocation);
         ParseUser.getCurrentUser().saveInBackground();
-        query.whereWithinMiles("riderLocation", driverLocation, 35.0);
+        query.whereWithinMiles("riderMarker", driverLocation, 35.0);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
@@ -156,7 +156,7 @@ public class DriverViewRequestsActivity extends AppCompatActivity implements Loc
             TextView distanceText = (TextView) convertView.findViewById(android.R.id.text1);
             TextView idText = (TextView) convertView.findViewById(android.R.id.text2);
             if (request != null) {
-                double distanceMiles = request.getParseGeoPoint("riderLocation").distanceInMilesTo(driverLocation);
+                double distanceMiles = request.getParseGeoPoint("riderMarker").distanceInMilesTo(driverLocation);
                 distanceText.setText(String.format(Locale.getDefault(),"%.2f miles", distanceMiles));
                 idText.setText(request.getObjectId());
             }

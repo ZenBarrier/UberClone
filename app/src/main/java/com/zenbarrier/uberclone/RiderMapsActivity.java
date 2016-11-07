@@ -18,7 +18,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
@@ -31,13 +33,15 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.List;
+import java.util.Locale;
 
 public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap;
     LocationManager locationManager;
     String provider;
-    Marker riderLocation;
+    Marker riderMarker;
+    Marker driverMarker;
     boolean isRequesting = false;
     Button buttonRiderRequest;
     TextView feedback;
@@ -116,7 +120,7 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             request.put("riderId", ParseUser.getCurrentUser().getObjectId());
             Location location = getUserLocation();
             ParseGeoPoint geoPoint = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-            request.put("riderLocation", geoPoint);
+            request.put("riderMarker", geoPoint);
             ParseACL acl = new ParseACL();
             acl.setPublicReadAccess(true);
             acl.setPublicWriteAccess(true);
@@ -193,13 +197,15 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
                                     if(e==null){
                                         if(objects.size()>0) {
                                             driver = objects.get(0);
+                                            buttonRiderRequest.setVisibility(View.INVISIBLE);
+                                            feedback.setText(R.string.rider_activity_feedback_on_the_way);
                                             Log.i("Driver", driver.getObjectId());
                                         }
                                         else{
                                             request.remove("driverId");
                                             request.saveInBackground();
-                                            handler.postDelayed(runnable, 2000);
                                         }
+                                        handler.postDelayed(runnable, 2000);
                                     }
                                     else{
                                         e.printStackTrace();
@@ -212,7 +218,30 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             });
         }
         else{
+            try {
+                driver.fetch();
+                ParseGeoPoint geoPoint = driver.getParseGeoPoint("location");
+                double distance = geoPoint.distanceInMilesTo(request.getParseGeoPoint("riderLocation"));
+                feedback.setText(String.format(Locale.ENGLISH,"Your driver is %.2f miles away", distance));
+                LatLng driverLocation = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
 
+                if(driverMarker != null){
+                    driverMarker.remove();
+                }
+
+                driverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title("You")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                builder.include(driverMarker.getPosition());
+                builder.include(riderMarker.getPosition());
+                LatLngBounds bound = builder.build();
+                int padding = 100;
+
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bound, padding));
+
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -250,13 +279,13 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         double lat = location.getLatitude();
         double lng = location.getLongitude();
         LatLng position = new LatLng(lat, lng);
-        if(riderLocation != null){
-            riderLocation.remove();
+        if(riderMarker != null){
+            riderMarker.remove();
         }
 
 
 
-        riderLocation = mMap.addMarker(new MarkerOptions().position(position).title("Your Location"));
+        riderMarker = mMap.addMarker(new MarkerOptions().position(position).title("Your Location"));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 16f));
     }
 
