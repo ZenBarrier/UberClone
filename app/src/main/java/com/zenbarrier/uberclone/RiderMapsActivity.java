@@ -178,13 +178,34 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
                 @Override
                 public void done(ParseObject object, ParseException e) {
                     if(e==null){
-                        String driverId = request.getString("driverId");
+                        final String driverId = request.getString("driverId");
                         if(driverId==null || driverId.length()<=0){
                             Log.i("Driver","none");
                         }
                         else{
                             Log.i("Driver","found");
                             handler.removeCallbacks(runnable);
+                            ParseQuery<ParseUser> queryDriver = ParseUser.getQuery();
+                            queryDriver.whereEqualTo("objectId", driverId);
+                            queryDriver.findInBackground(new FindCallback<ParseUser>() {
+                                @Override
+                                public void done(List<ParseUser> objects, ParseException e) {
+                                    if(e==null){
+                                        if(objects.size()>0) {
+                                            driver = objects.get(0);
+                                            Log.i("Driver", driver.getObjectId());
+                                        }
+                                        else{
+                                            request.remove("driverId");
+                                            request.saveInBackground();
+                                            handler.postDelayed(runnable, 2000);
+                                        }
+                                    }
+                                    else{
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
                         }
                     }
                 }
