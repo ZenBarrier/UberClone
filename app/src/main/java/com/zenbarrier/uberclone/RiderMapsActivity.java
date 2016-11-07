@@ -5,9 +5,11 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,6 +22,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -36,7 +39,12 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     String provider;
     Marker riderLocation;
     boolean isRequesting = false;
+    Button buttonRiderRequest;
+    TextView feedback;
     ParseObject request;
+    ParseUser driver;
+    Handler handler = new Handler();
+    Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +54,19 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        buttonRiderRequest = (Button) findViewById(R.id.buttonRiderRequest);
+        feedback = (TextView) findViewById(R.id.textRiderFeedback);
+
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                driverUpdates();
+                handler.postDelayed(this, 2000);
+            }
+        };
+
+        checkActiveRequests();
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
@@ -84,8 +105,6 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     public void requestUber(View view) {
-        TextView feedback = (TextView) findViewById(R.id.textRiderFeedback);
-        Button buttonRiderRequest = (Button) findViewById(R.id.buttonRiderRequest);
         isRequesting = !isRequesting;
 
         if (isRequesting) {
@@ -103,7 +122,9 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             acl.setPublicWriteAccess(true);
             request.setACL(acl);
             request.saveInBackground();
+            handler.postDelayed(runnable, 2000);
         } else {
+            handler.removeCallbacks(runnable);
             feedback.setText(R.string.rider_activity_feedback_canceled);
             feedback.animate().alpha(0f).setStartDelay(2000).setDuration(2000);
             buttonRiderRequest.setText(R.string.rider_activity_button_request);
@@ -123,6 +144,54 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
                     }
                 }
             });
+        }
+    }
+
+    void checkActiveRequests(){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Requests");
+        query.whereEqualTo("riderId", ParseUser.getCurrentUser().getObjectId());
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if(e==null){
+                    if(objects.size()>0) {
+                        request = objects.get(0);
+                        isRequesting = true;
+                        buttonRiderRequest.setText(R.string.rider_activity_button_cancel);
+                        feedback.setText(R.string.rider_activity_feedback_finding);
+                        handler.postDelayed(runnable, 2000);
+                        objects.remove(0);
+                        try {
+                            ParseObject.deleteAll(objects);
+                        } catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    void driverUpdates(){
+        if(driver == null){
+            request.fetchInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if(e==null){
+                        String driverId = request.getString("driverId");
+                        if(driverId==null || driverId.length()<=0){
+                            Log.i("Driver","none");
+                        }
+                        else{
+                            Log.i("Driver","found");
+                            handler.removeCallbacks(runnable);
+                        }
+                    }
+                }
+            });
+        }
+        else{
+
         }
     }
 
@@ -164,8 +233,10 @@ public class RiderMapsActivity extends FragmentActivity implements OnMapReadyCal
             riderLocation.remove();
         }
 
+
+
         riderLocation = mMap.addMarker(new MarkerOptions().position(position).title("Your Location"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 16f));
     }
 
     @Override
